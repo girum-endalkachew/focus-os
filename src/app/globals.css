@@ -1,19 +1,16 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 :root {
-  /* FocusOS Color System */
   --background: #050808;
   --surface: #0B1510;
   --surface-2: #102019;
   --surface-glass: rgba(255, 255, 255, 0.05);
   --border: rgba(255, 255, 255, 0.08);
 
-  /* Text System */
   --text-primary: #F4F7F3;
   --text-secondary: #A5B0AB;
   --text-muted: #65726A;
 
-  /* Accents & Status */
   --accent: #B8FF3D;
   --accent-glow: rgba(184, 255, 61, 0.15);
   --amber-1: #F5B64B;
@@ -32,7 +29,6 @@ body {
   min-height: 100vh;
 }
 
-/* Glassmorphism System Utilities */
 .glass-card {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);

@@ -13,7 +13,7 @@ export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
         ref={ref}
         className={cn(
           "glass-card rounded-2xl p-6 transition-all duration-300",
-          glow && "focus-glow border-[#B8FF3D]/30",
+          glow && "focus-glow border-lime-400",
           className
         )}
         {...props}
