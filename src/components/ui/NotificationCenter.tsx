@@ -1,13 +1,13 @@
 ﻿'use client';
 
 import React, { useState } from 'react';
-import { GlassCard } from '../GlassCard';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { Badge } from '@/components/ui/Badge';
 import { Bell, Flame, Trophy, CheckCircle2, X } from 'lucide-react';
-import { Badge } from '../Badge';
 
 export const NotificationCenter = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
+  const [notifications] = useState([
     { id: '1', title: '7-Day Streak Alive!', message: 'Log 1 more focus session today to protect your streak.', time: '10 mins ago', icon: Flame, unread: true },
     { id: '2', title: 'Focus Session Completed', message: 'You logged 25m in "FocusOS Auth Routes". +50 XP earned.', time: '1 hour ago', icon: CheckCircle2, unread: true },
     { id: '3', title: 'Achievement Unlocked!', message: 'You unlocked "10 Hour Week" milestone.', time: 'Yesterday', icon: Trophy, unread: false },
