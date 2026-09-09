@@ -1,4 +1,4 @@
-﻿datasource db {
+datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
@@ -8,15 +8,58 @@ generator client {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
+  id            String            @id @default(cuid())
+  email         String            @unique
+  passwordHash  String?
   name          String?
   avatarUrl     String?
-  streakDays    Int            @default(0)
-  totalXp       Int            @default(0)
+  streakDays    Int               @default(0)
+  totalXp       Int               @default(0)
+  level         Int               @default(1)
+  focusCoins    Int               @default(0)
   sessions      FocusSession[]
   projects      Project[]
   tasks         Task[]
+  goals         Goal[]
+  achievements  UserAchievement[]
+  xpLogs        XPTransaction[]
+  notifications Notification[]
+  aiInsights    AIInsight[]
+  dailyStats    DailyStats[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model Project {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  color       String         @default("#B8FF3D")
+  targetHours Int            @default(10)
+  spentHours  Float          @default(0)
+  isArchived  Boolean        @default(false)
+  tasks       Task[]
+  sessions    FocusSession[]
+  goals       Goal[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Task {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId     String?
+  project       Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  title         String
+  completed     Boolean        @default(false)
+  priority      String         @default("medium") // 'high', 'medium', 'low'
+  estMinutes    Int            @default(25)
+  actualMinutes Int            @default(0)
+  dueDate       String?
+  sessions      FocusSession[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -25,35 +68,95 @@ model FocusSession {
   id          String   @id @default(cuid())
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  taskId      String?
+  task        Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
   durationMin Int
-  mode        String
+  mode        String   // 'pomodoro', 'shortBreak', 'longBreak', 'custom'
   completed   Boolean  @default(true)
+  focusScore  Int      @default(100)
+  notes       String?
   xpEarned    Int      @default(50)
   createdAt   DateTime @default(now())
 }
 
-model Project {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name        String
-  description String?
-  color       String   @default("#B8FF3D")
-  targetHours Int      @default(10)
-  spentHours  Float    @default(0)
-  tasks       Task[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Task {
+model Goal {
   id          String   @id @default(cuid())
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   projectId   String?
   project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  text        String
+  title       String
+  description String?
+  timeframe   String   // 'daily', 'weekly', 'monthly', 'longTerm'
+  targetHours Int      @default(10)
+  spentHours  Float    @default(0)
+  deadline    String?
   completed   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Achievement {
+  id          String            @id @default(cuid())
+  key         String            @unique
+  title       String
+  description String
+  tier        String            // 'Common', 'Rare', 'Epic', 'Legendary'
+  xpReward    Int               @default(100)
+  users       UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  unlockedAt    DateTime    @default(now())
+
+  @@unique([userId, achievementId])
+}
+
+model XPTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Int
+  source    String   // 'session', 'achievement', 'streak'
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AIInsight {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  summary        String
+  peakWindow     String?
+  recommendation String
+  generatedAt    DateTime @default(now())
+}
+
+model DailyStats {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date              String   // YYYY-MM-DD
+  deepWorkMinutes   Int      @default(0)
+  completedSessions Int      @default(0)
+  focusScore        Int      @default(100)
+  createdAt         DateTime @default(now())
+
+  @@unique([userId, date])
 }
